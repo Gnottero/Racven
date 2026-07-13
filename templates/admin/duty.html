@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Turno piatti &middot; Turn Piatts{% endblock %}
+{% block body_class %}page-wide{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Turno piatti</h1>
+    <p>Modifica le coppie e l'ordine di rotazione del turno piatti. <a href="{{ url_for('admin.dashboard') }}">&larr; Utenti</a></p>
+</div>
+
+<div class="card">
+    <h2>Ordine contributori</h2>
+    <p>L'ordine determina come vengono formate le coppie (terzina finale se il numero è dispari). Riordina, controlla l'anteprima, poi applica.</p>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Tag</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in contributors %}
+            <tr>
+                <td data-label="Nome">{{ c['first_name'] }} {{ c['last_name'] }}</td>
+                <td data-label="Tag" class="tag-mono">@{{ c['user_tag'] }}</td>
+                <td data-label="Azioni">
+                    <div class="action-group">
+                        {% if not loop.first %}
+                        <form class="inline" method="post" action="{{ url_for('admin.move_contributor', user_id=c['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="direction" value="up">
+                            <button class="btn btn-secondary btn-sm" type="submit">&uarr;</button>
+                        </form>
+                        {% endif %}
+                        {% if not loop.last %}
+                        <form class="inline" method="post" action="{{ url_for('admin.move_contributor', user_id=c['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="direction" value="down">
+                            <button class="btn btn-secondary btn-sm" type="submit">&darr;</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if preview_groups %}
+    <h2>Coppie risultanti</h2>
+    {% for group in preview_groups %}
+    <div class="message-item">
+        <div class="message-body">
+            {% for member in group %}{{ member['first_name'] }} {{ member['last_name'] }}{% if not loop.last %}, {% endif %}{% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{{ url_for('admin.recalculate_duty') }}" style="margin-top: 1rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary" type="submit">Applica e ricalcola turno piatti</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Ordine di rotazione</h2>
+    <p>Cambia l'ordine con cui le coppie attuali si alternano nel turno, senza modificarne la composizione. Il turno di oggi non viene toccato.</p>
+    {% if groups %}
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Coppia</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            <tr>
+                <td data-label="Coppia">
+                    {% for member in group['members'] %}{{ member['first_name'] }} {{ member['last_name'] }}{% if not loop.last %}, {% endif %}{% endfor %}
+                </td>
+                <td data-label="Azioni">
+                    <div class="action-group">
+                        {% if not loop.first %}
+                        <form class="inline" method="post" action="{{ url_for('admin.move_duty_group', group_id=group['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="direction" value="up">
+                            <button class="btn btn-secondary btn-sm" type="submit">&uarr;</button>
+                        </form>
+                        {% endif %}
+                        {% if not loop.last %}
+                        <form class="inline" method="post" action="{{ url_for('admin.move_duty_group', group_id=group['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="direction" value="down">
+                            <button class="btn btn-secondary btn-sm" type="submit">&darr;</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nessuna coppia disponibile: servono almeno un contributore.</p>
+    {% endif %}
+</div>
+{% endblock %}

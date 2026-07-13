@@ -55,10 +55,31 @@ def set_contributor(user_id, contributor):
 def get_contributor_ids():
     conn = get_db()
     rows = conn.execute(
-        'SELECT id FROM users WHERE contributor = 1 ORDER BY id'
+        'SELECT id FROM users WHERE contributor = 1 '
+        'ORDER BY (duty_order IS NULL), duty_order, id'
     ).fetchall()
     conn.close()
     return [row['id'] for row in rows]
+
+
+def get_contributors_ordered():
+    conn = get_db()
+    rows = conn.execute(
+        'SELECT id, first_name, last_name, user_tag FROM users WHERE contributor = 1 '
+        'ORDER BY (duty_order IS NULL), duty_order, id'
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def set_contributor_order(ordered_ids):
+    conn = get_db()
+    conn.executemany(
+        'UPDATE users SET duty_order = ? WHERE id = ?',
+        [(i, user_id) for i, user_id in enumerate(ordered_ids)],
+    )
+    conn.commit()
+    conn.close()
 
 
 def delete_user(user_id):

@@ -23,6 +23,31 @@ def has_schedule(cycle_month):
     return get_latest_version(cycle_month) > 0
 
 
+def get_groups_with_members(cycle_month, version):
+    conn = get_db()
+    query = (
+        'SELECT g.id AS group_id, g.ordinal, u.id AS user_id, u.first_name, u.last_name, u.user_tag '
+        'FROM duty_groups g '
+        'JOIN duty_group_members m ON m.duty_group_id = g.id '
+        'JOIN users u ON u.id = m.user_id '
+        'WHERE g.cycle_month = ? AND g.version = ? '
+        'ORDER BY g.ordinal ASC, u.id ASC'
+    )
+    rows = conn.execute(query, (cycle_month, version)).fetchall()
+    conn.close()
+    return rows
+
+
+def update_group_ordinals(ordinal_by_group_id):
+    conn = get_db()
+    conn.executemany(
+        'UPDATE duty_groups SET ordinal = ? WHERE id = ?',
+        [(ordinal, group_id) for group_id, ordinal in ordinal_by_group_id.items()],
+    )
+    conn.commit()
+    conn.close()
+
+
 def insert_group(cycle_month, version, ordinal, member_ids):
     conn = get_db()
     cur = conn.execute(

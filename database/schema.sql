@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     role          TEXT NOT NULL DEFAULT 'participant' CHECK (role IN ('participant', 'admin')),
     contributor   INTEGER NOT NULL DEFAULT 1 CHECK (contributor IN (0, 1)),
+    duty_order    INTEGER,
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

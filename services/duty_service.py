@@ -42,6 +42,21 @@ def _row_to_member(row):
     }
 
 
+def _assign_days(cycle_month, start_date, group_ids, start_idx=0):
+    year, month = (int(part) for part in cycle_month.split('-'))
+    last_day = calendar.monthrange(year, month)[1]
+    end_date = date(year, month, last_day)
+    if start_date > end_date:
+        return
+
+    day = start_date
+    idx = start_idx
+    while day <= end_date:
+        duty_dao.insert_assignment(day.isoformat(), group_ids[idx % len(group_ids)])
+        idx += 1
+        day += timedelta(days=1)
+
+
 def _generate_schedule(cycle_month, start_date):
     contributor_ids = users_dao.get_contributor_ids()
     groups = partition_into_groups(contributor_ids)
@@ -57,15 +72,7 @@ def _generate_schedule(cycle_month, start_date):
         for ordinal, member_ids in enumerate(groups)
     ]
 
-    last_day = calendar.monthrange(start_date.year, start_date.month)[1]
-    end_date = date(start_date.year, start_date.month, last_day)
-
-    day = start_date
-    idx = 0
-    while day <= end_date:
-        duty_dao.insert_assignment(day.isoformat(), group_ids[idx % len(group_ids)])
-        idx += 1
-        day += timedelta(days=1)
+    _assign_days(cycle_month, start_date, group_ids)
 
 
 def ensure_month_schedule(today=None):
@@ -83,6 +90,52 @@ def recalculate_schedule(today=None):
     today = today or date.today()
     cycle_month = today.strftime('%Y-%m')
     _generate_schedule(cycle_month, today)
+
+
+def get_current_groups(today=None):
+    """Groups (with members) of the latest version for the current cycle
+    month, ordered by their current rotation ordinal."""
+    today = today or date.today()
+    ensure_month_schedule(today)
+    cycle_month = today.strftime('%Y-%m')
+    version = duty_dao.get_latest_version(cycle_month)
+    rows = duty_dao.get_groups_with_members(cycle_month, version)
+
+    groups = []
+    for group_id, group_rows in groupby(rows, key=lambda r: r['group_id']):
+        group_rows = list(group_rows)
+        groups.append({
+            'id': group_id,
+            'ordinal': group_rows[0]['ordinal'],
+            'members': [_row_to_member(r) for r in group_rows],
+        })
+    groups.sort(key=lambda g: g['ordinal'])
+    return groups
+
+
+def reorder_groups(new_order_group_ids, today=None):
+    """Change the rotation order of the current month's existing groups
+    without touching their membership. Today's already-assigned duty is
+    left untouched; the round robin for tomorrow onward resumes right
+    after today's group in the new order, so every group still gets a
+    turn before any of them repeats."""
+    today = today or date.today()
+    cycle_month = today.strftime('%Y-%m')
+
+    duty_dao.update_group_ordinals(
+        {group_id: idx for idx, group_id in enumerate(new_order_group_ids)}
+    )
+
+    today_rows = duty_dao.get_assignment_for_date(today.isoformat())
+    if today_rows and today_rows[0]['duty_group_id'] in new_order_group_ids:
+        current_idx = new_order_group_ids.index(today_rows[0]['duty_group_id'])
+        start_idx = (current_idx + 1) % len(new_order_group_ids)
+    else:
+        start_idx = 0
+
+    tomorrow = today + timedelta(days=1)
+    duty_dao.delete_assignments_from(cycle_month, tomorrow.isoformat())
+    _assign_days(cycle_month, tomorrow, new_order_group_ids, start_idx=start_idx)
 
 
 def get_today_duty(today=None):

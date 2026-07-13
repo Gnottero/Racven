@@ -19,4 +19,10 @@ def init_db():
     with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
         conn.executescript(f.read())
     conn.commit()
+    try:
+        conn.execute('ALTER TABLE users ADD COLUMN duty_order INTEGER')
+        conn.commit()
+    except sqlite3.OperationalError as exc:
+        if 'duplicate column' not in str(exc):
+            raise
     conn.close()
