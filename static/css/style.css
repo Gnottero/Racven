@@ -445,6 +445,17 @@ form.inline {
     pointer-events: none;
 }
 
+.tv-reachable-address {
+    position: fixed;
+    bottom: 1.2vh;
+    left: 1.5vw;
+    font-family: var(--font-mono);
+    font-size: 1.1vw;
+    color: var(--muted-foreground);
+    opacity: .85;
+    pointer-events: none;
+}
+
 .tv-empty {
     color: var(--muted-foreground);
     font-size: 2.5vw;

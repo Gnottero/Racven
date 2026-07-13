@@ -1,7 +1,21 @@
 import re
+import socket
 
 USER_TAG_BODY_RE = re.compile(r'^[A-Za-z0-9_]{2,20}$')
 MAX_MESSAGE_LENGTH = 280
+
+
+def get_local_ip():
+    """Indirizzo IP della macchina sulla rete locale (non richiede connessione a internet:
+    connect() su UDP fa solo un lookup di routing, non invia pacchetti)."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 80))
+        return s.getsockname()[0]
+    except OSError:
+        return '127.0.0.1'
+    finally:
+        s.close()
 
 
 def normalize_user_tag(raw_tag):
