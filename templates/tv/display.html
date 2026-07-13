@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#b62e38">
+    <title>Turn Piatts &middot; TV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="tv-body">
+    <div class="tv-stage" id="tv-stage">
+        <div id="tv-carousel"></div>
+    </div>
+    <div class="tv-watermark">Turn Piatts</div>
+
+    <script>
+        window.TV_CONFIG = {
+            initialMessages: {{ initial_messages | tojson }},
+            carouselInterval: {{ carousel_interval }},
+            messageDisplaySeconds: {{ message_display_seconds }},
+            dutyDisplaySeconds: {{ duty_display_seconds }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/tv.js') }}"></script>
+</body>
+</html>

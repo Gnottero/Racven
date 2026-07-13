@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Registrati &middot; Turn Piatts{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Crea un account</h1>
+    <p>Registrati per partecipare al turno piatti.</p>
+</div>
+
+<div class="card">
+    <h2>Registrati</h2>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="first_name">Nome</label>
+        <input class="input" type="text" id="first_name" name="first_name" value="{{ form.get('first_name', '') }}" required autofocus>
+
+        <label for="last_name">Cognome</label>
+        <input class="input" type="text" id="last_name" name="last_name" value="{{ form.get('last_name', '') }}" required>
+
+        <label for="user_tag">Tag utente</label>
+        <input class="input" type="text" id="user_tag" name="user_tag" placeholder="@iltuotag" value="{{ form.get('user_tag', '') }}" required>
+
+        <label for="password">Password</label>
+        <input class="input" type="password" id="password" name="password" required>
+
+        <label for="password2">Conferma password</label>
+        <input class="input" type="password" id="password2" name="password2" required>
+
+        <button class="btn btn-primary btn-block" type="submit">Crea account</button>
+    </form>
+</div>
+<p>Hai già un account? <a href="{{ url_for('auth.login') }}">Accedi</a></p>
+{% endblock %}

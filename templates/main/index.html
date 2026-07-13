@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Turn Piatts{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Bacheca</h1>
+    <p>Manda un messaggio alla TV e gestisci il turno piatti della community.</p>
+</div>
+
+<div class="card">
+    <h2>Manda un messaggio alla TV</h2>
+    <form method="post" action="{{ url_for('main.send_message') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="body">Il tuo messaggio</label>
+        <textarea class="input" id="body" name="body" rows="3" maxlength="280" placeholder="Scrivi qualcosa da mostrare in TV..." required></textarea>
+        <button class="btn btn-primary" type="submit">Invia alla TV</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Turno piatti</h2>
+    <p>Mostra sulla TV la programmazione mensile del turno piatti, evidenziando chi tocca oggi.</p>
+    <form method="post" action="{{ url_for('main.show_duty') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-secondary" type="submit">Mostra turno piatti in TV</button>
+    </form>
+</div>
+
+{% if recent_messages %}
+<div class="card">
+    <h2>I tuoi ultimi messaggi</h2>
+    {% for m in recent_messages %}
+    <div class="message-item">
+        <div class="message-meta">{{ m['created_at'] }}</div>
+        <div class="message-body">{{ m['body'] }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

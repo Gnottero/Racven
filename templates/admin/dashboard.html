@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Admin &middot; Turn Piatts{% endblock %}
+{% block body_class %}page-wide{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Amministrazione</h1>
+    <p>Gestisci utenti e stato dei contributori del turno piatti.</p>
+</div>
+
+<div class="card">
+    <h2>Utenti registrati</h2>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Tag</th>
+                <th>Ruolo</th>
+                <th>Contributore</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td data-label="Nome">{{ user['first_name'] }} {{ user['last_name'] }}</td>
+                <td data-label="Tag" class="tag-mono">@{{ user['user_tag'] }}</td>
+                <td data-label="Ruolo">
+                    {% if user['role'] == 'admin' %}
+                    <span class="badge badge-admin">Admin</span>
+                    {% else %}
+                    Utente
+                    {% endif %}
+                </td>
+                <td data-label="Contributore">
+                    {% if user['contributor'] %}
+                    <span class="badge badge-on">Attivo</span>
+                    {% else %}
+                    <span class="badge badge-off">Non attivo</span>
+                    {% endif %}
+                </td>
+                <td data-label="Azioni">
+                    <div class="action-group">
+                        <form class="inline" method="post" action="{{ url_for('admin.toggle_contributor', user_id=user['id']) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-secondary btn-sm" type="submit">
+                                {% if user['contributor'] %}Disattiva{% else %}Attiva{% endif %}
+                            </button>
+                        </form>
+                        {% if user['id'] != current_user.id %}
+                        <form class="inline" method="post" action="{{ url_for('admin.delete_user', user_id=user['id']) }}"
+                              onsubmit="return confirm('Eliminare definitivamente @{{ user['user_tag'] }}? Verranno cancellati anche i suoi messaggi e il turno piatti verrà ricalcolato.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-destructive btn-sm" type="submit">Elimina</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
