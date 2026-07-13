@@ -210,6 +210,16 @@
         source.addEventListener('duty_display', function (evt) {
             enqueueEvent('duty_display', JSON.parse(evt.data));
         });
+        source.addEventListener('chat_message_deleted', function (evt) {
+            var data = JSON.parse(evt.data);
+            messages = messages.filter(function (m) { return m.id !== data.id; });
+            eventQueue = eventQueue.filter(function (e) {
+                return !(e.type === 'chat_message' && e.data.id === data.id);
+            });
+            if (!currentOverlay) {
+                renderCarousel();
+            }
+        });
     }
 
     startCarousel();

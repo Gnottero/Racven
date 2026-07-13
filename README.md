@@ -41,6 +41,13 @@ waitress-serve --host=0.0.0.0 --port=8080 racven:app
 
 ## Kiosk su Raspberry Pi
 
+Raspberry Pi OS (specie la variante *Lite*) può non includere di default alcun font emoji a colori: senza installarne uno, le emoji nei messaggi vengono mostrate come riquadri vuoti sulla TV. Installa il font prima di avviare il kiosk:
+
+```bash
+sudo apt install -y fonts-noto-color-emoji
+fc-cache -f
+```
+
 Per mostrare `/tv` a schermo intero via Chromium, e permettere il suono di notifica di partire senza interazione utente:
 
 ```bash

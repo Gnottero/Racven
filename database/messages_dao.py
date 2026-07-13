@@ -33,11 +33,36 @@ def get_today_messages():
 def get_recent_messages_for_user(user_id, limit=5):
     conn = get_db()
     rows = conn.execute(
-        'SELECT id, body, created_at FROM messages WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
+        _SELECT_WITH_USER + 'WHERE m.user_id = ? ORDER BY m.created_at DESC LIMIT ?',
         (user_id, limit),
     ).fetchall()
     conn.close()
     return rows
+
+
+def get_all_messages(limit=50):
+    conn = get_db()
+    rows = conn.execute(
+        _SELECT_WITH_USER + 'ORDER BY m.created_at DESC LIMIT ?', (limit,)
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def get_message_by_id(message_id):
+    conn = get_db()
+    row = conn.execute(
+        'SELECT id, user_id, body, created_at FROM messages WHERE id = ?', (message_id,)
+    ).fetchone()
+    conn.close()
+    return row
+
+
+def delete_message(message_id):
+    conn = get_db()
+    conn.execute('DELETE FROM messages WHERE id = ?', (message_id,))
+    conn.commit()
+    conn.close()
 
 
 def to_dict(row):

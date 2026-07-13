@@ -49,8 +49,8 @@
     --status-free: #34c759;
     --status-oos: #ff3b30;
 
-    --font-sans: -apple-system, BlinkMacSystemFont, 'DM Sans', 'Segoe UI', Roboto, ui-sans-serif, system-ui, sans-serif;
-    --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'DM Sans', 'Segoe UI', Roboto, ui-sans-serif, system-ui, 'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, 'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji', monospace;
     --radius: .625rem;
     --radius-lg: 1.25rem;
     --radius-xl: 1.75rem;
@@ -397,6 +397,10 @@ th {
 
 .message-body {
     font-size: .9375rem;
+}
+
+.message-item .btn-destructive {
+    margin-top: .5rem;
 }
 
 form.inline {

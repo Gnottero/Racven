@@ -27,11 +27,20 @@
 
 {% if recent_messages %}
 <div class="card">
-    <h2>I tuoi ultimi messaggi</h2>
+    <h2>{% if current_user.is_admin %}Tutti i messaggi{% else %}I tuoi ultimi messaggi{% endif %}</h2>
     {% for m in recent_messages %}
     <div class="message-item">
-        <div class="message-meta">{{ m['created_at'] }}</div>
+        <div class="message-meta">
+            {% if current_user.is_admin %}{{ m['first_name'] }} {{ m['last_name'] }} &middot; @{{ m['user_tag'] }} &middot; {% endif %}{{ m['created_at'] }}
+        </div>
         <div class="message-body">{{ m['body'] }}</div>
+        {% if current_user.is_admin or m['user_id'] == current_user.id %}
+        <form method="post" action="{{ url_for('main.delete_message', message_id=m['id']) }}"
+              onsubmit="return confirm('Eliminare questo messaggio?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-destructive btn-sm" type="submit">Elimina</button>
+        </form>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
